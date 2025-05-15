@@ -1,2 +1,2 @@
-g++ -std=c++20 -o gui .\*.cpp .\*.hpp .\imgui\*.cpp .\imgui\*.h -I./imgui -I./GLFW/include -L./GLFW/lib-mingw-w64 -lglfw3 -lopengl32 -lgdi32 -limm32 -lshell32 -lole32 -lpthread
+g++ -std=c++20 -o gui .\*.cpp .\*.hpp .\imgui\*.cpp .\imgui\*.h .\filedialog\*.c .\implot\*.cpp .\implot\implot.h .\implot\implot_internal.h -LC:/mingw/lib -I./imgui -I./implot -I./GLFW/include -I./filedialog -L./GLFW/lib-mingw-w64 -lglfw3 -lopengl32 -lgdi32 -limm32 -lshell32 -lole32 -lpthread -lcomdlg32 
 echo "Done!"

@@ -10,7 +10,6 @@
 #include <GLES2/gl2.h>
 #endif
 #include "GLFW/\include\glfw3.h"
-#include "filedialog/tinyfiledialogs.h"
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
@@ -31,11 +30,11 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-int createWindowWithImgui(int windowWidth, int windowHeight, int maximized, int decorated)
+GLFWwindow* CreateWindowIMGUI(int windowWidth, int windowHeight, int maximized, int decorated)
 {
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
-        return 1;
+        return nullptr;
 
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -46,7 +45,7 @@ int createWindowWithImgui(int windowWidth, int windowHeight, int maximized, int 
 
     GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "ImGui Window", nullptr, nullptr);
     if (window == nullptr)
-        return 1;
+        return nullptr;
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
@@ -61,53 +60,39 @@ int createWindowWithImgui(int windowWidth, int windowHeight, int maximized, int 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    while (!glfwWindowShouldClose(window))
-    {
-        glfwPollEvents();
+    return window;
+}
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+void UpdateWindowSize(GLFWwindow* window) {
+    glfwPollEvents();
 
-        int width, height;
-        glfwGetWindowSize(window, &width, &height);
-        ImGui::SetNextWindowSize(ImVec2((float)width, (float)height));
-        ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
-        //Actual stuff =============================================
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    ImGui::SetNextWindowSize(ImVec2((float)width, (float)height));
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
 
+}
 
-        ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoDecoration);
-        ImGui::Text("Select An Audio File!");
-        if (ImGui::Button("Import File")) {
-            const char* filters[] = { "*.txt", "*.png", "*.jpg", "*.*" };
-            const char* file = tinyfd_openFileDialog("Select a file", "", 4, filters, "All files", 0);
-            if (file) {
-                std::cout << "Imported file: " << file << std::endl;
-            }
-        }
-        //===============================================================
+void RenderWindow(GLFWwindow* window) {
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-        ImGui::End();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    glfwSwapBuffers(window);
+}
 
-        // Rendering
-        ImGui::Render();
-        int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
-        glViewport(0, 0, display_w, display_h);
-        glClearColor(0.f, 0.f, 0.f, 0.f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(window);
-    }
-
-    // Cleanup
+void TerminateIMGUI(GLFWwindow* window) {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     glfwDestroyWindow(window);
     glfwTerminate();
-
-    return 0;
 }
