@@ -1,0 +1,1 @@
+del gui.exe
