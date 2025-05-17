@@ -76,6 +76,7 @@
         "set": "cpp",
         "stop_token": "cpp",
         "thread": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "complex": "cpp"
     }
 }

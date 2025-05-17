@@ -35,6 +35,14 @@ GLFWwindow* CreateWindowIMGUI(int windowWidth, int windowHeight, int maximized, 
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
         return nullptr;
+        
+    // ImFontConfig fontConfig;
+    // fontConfig.OversampleH = 2;
+    // fontConfig.OversampleV = 2;
+    // fontConfig.SizePixels = 16.0f * dpiScale;
+    //Loads a custom font, replace with your own font
+    // this->ui.font = ImGui::GetIO().Fonts->AddFontFromFileTTF(
+    // "resources/fonts/RobotoMono-Medium.ttf", 16.0f, &fontConfig);
 
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -55,6 +63,8 @@ GLFWwindow* CreateWindowIMGUI(int windowWidth, int windowHeight, int maximized, 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.IniFilename = NULL;
+
+    ImGui::GetStyle().ScaleAllSizes(3);
 
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
