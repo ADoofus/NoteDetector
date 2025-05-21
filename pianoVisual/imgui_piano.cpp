@@ -19,7 +19,7 @@ namespace ImGuiExt::Piano
 	{
 		assert(beginOctaveNote <= keyCodeMax);
 		assert(endOctaveNote <= keyCodeMax);
-		assert(beginOctaveNote < endOctaveNote);zz
+		assert(beginOctaveNote < endOctaveNote);
 
 		constexpr bool isNoteDark[12] = { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
 		constexpr unsigned char noteLightNumber[12] = { 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 7 };
