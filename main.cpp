@@ -241,6 +241,9 @@ void UpdateData() {
     if (peaks.empty()) return;
 
     int startIdx = TimeToIndex(peaks[timeIndex]);
+    if (analyzeFullAudio) {startIdx = 0;}
+    if (analyzeFullAudio) {intervalLen = len;}
+
     compIntensity.resize(intervalLen);
     for (int i = 0; i < intervalLen; ++i) {
         double hanning = 0.5 * (1 - std::cos(2 * PI * i / (intervalLen - 1)));
@@ -329,11 +332,7 @@ void ChangeInterval(bool forward) {
 void ToggleFullAudio(bool toggle) {
     if (toggle) {
         intervalLen = len;
-        intensityInterval.resize(intervalLen);
-        for (int i = 0; i < intervalLen; ++i) {
-            intensityInterval[i] = intensity[i];
-        }
-
+        timeIndex = 0;
         UpdateData();
         PeakDetection();
     } else {
@@ -509,19 +508,23 @@ int main() {
             } else {
                 if (ImPlot::BeginPlot(waveformTitle.c_str())) {
                     ImPlot::SetupAxes("Time (Seconds)", "Amplitude");
-                    ImPlot::PlotLine("Signal", xAxis.data(), intensity.data(), len);
-                    ImPlot::PlotInfLines("Peaks", plotPeaks.data(), static_cast<int>(peaks.size()));
-                    if (!peaks.empty()) {
-                        double startTime = plotPeaks[timeIndex];
-                        double endTime = (timeIndex + 1 < static_cast<int>(plotPeaks.size())) ? plotPeaks[timeIndex + 1] : duration;
+                    if (analyzeFullAudio) {
+                        ImPlot::PlotLine("Signal", xAxis.data(), intensity.data(), len);
+                    } else {
+                        ImPlot::PlotLine("Signal", xAxis.data(), intensity.data(), len);
+                        ImPlot::PlotInfLines("Peaks", plotPeaks.data(), static_cast<int>(peaks.size()));
+                        if (!peaks.empty()) {
+                            double startTime = plotPeaks[timeIndex];
+                            double endTime = (timeIndex + 1 < static_cast<int>(plotPeaks.size())) ? plotPeaks[timeIndex + 1] : duration;
 
-                        std::vector<double> intervalFillX = { startTime, endTime };
-                        std::vector<double> intervalFillLow = { -1.0, -1.0 }; // Y-min (adjust as needed)
-                        std::vector<double> intervalFillHigh = { 1.0, 1.0 };  // Y-max (adjust as needed)
+                            std::vector<double> intervalFillX = { startTime, endTime };
+                            std::vector<double> intervalFillLow = { -1.0, -1.0 }; // Y-min (adjust as needed)
+                            std::vector<double> intervalFillHigh = { 1.0, 1.0 };  // Y-max (adjust as needed)
 
-                        ImPlot::PushStyleColor(ImPlotCol_Fill, IM_COL32(255, 255, 0, 50)); // Light yellow transparent fill
-                        ImPlot::PlotShaded("Current Interval", intervalFillX.data(), intervalFillLow.data(), intervalFillHigh.data(), 2);
-                        ImPlot::PopStyleColor();
+                            ImPlot::PushStyleColor(ImPlotCol_Fill, IM_COL32(255, 255, 0, 50)); // Light yellow transparent fill
+                            ImPlot::PlotShaded("Current Interval", intervalFillX.data(), intervalFillLow.data(), intervalFillHigh.data(), 2);
+                            ImPlot::PopStyleColor();
+                        }
                     }
 
                     ImPlot::EndPlot();
@@ -530,14 +533,18 @@ int main() {
                     ImPlot::SetNextAxesToFit();
                     needsAutoFit = false;  // reset
                 }
-                if (ImPlot::BeginPlot(waveformTitle2.c_str())) {
+                if (!analyzeFullAudio && ImPlot::BeginPlot(waveformTitle2.c_str())) {
                     ImPlot::SetupAxes("Time (Seconds)", "Amplitude");
                     ImPlot::PlotLine("Signal", xAxisInterval.data(), intensityInterval.data(), intervalLen);
                     ImPlot::EndPlot();
                 }
                 if (ImPlot::BeginPlot(spectrumTitle.c_str())) {
                     ImPlot::SetupAxes("Frequency (Hz)", "Intensity");
-                    ImPlot::PlotLine("FFT", fxAxis.data(), fIntensity.data(), intervalLen / 2);
+                    if (analyzeFullAudio) {
+                        ImPlot::PlotLine("FFT", fxAxis.data(), fIntensity.data(), len / 2);
+                    } else {
+                        ImPlot::PlotLine("FFT", fxAxis.data(), fIntensity.data(), intervalLen / 2);
+                    }
                     ImPlot::EndPlot();
                 }
             }
