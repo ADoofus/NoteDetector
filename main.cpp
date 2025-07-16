@@ -187,7 +187,6 @@ void StopAudio() {
 
 const char* filters[] = { "*.wav", "*.aiff", "*.jpg", "*.*" };
 
-// Helper to convert time (seconds) to sample index
 inline int TimeToIndex(double time) {
     return static_cast<int>(time * sampleRate);
 }
@@ -282,7 +281,6 @@ void OnImport(const char* file) {
 
     PeakDetection();
 
-    // detectedPeaks are sample indices; convert to seconds here:
     std::vector<double> detectedPeaks = get_wave_info(intensity).peaks;
     peaks.resize(detectedPeaks.size());
     plotPeaks.resize(detectedPeaks.size());
@@ -387,7 +385,7 @@ void ListAudioDevices() {
 bool SimplePianoCallback(void* userData, ImGuiExt::Piano::KeyboardMsgType msg, ImGuiExt::Piano::keyCode_t keyCode, float velocity) {
     switch (msg) {
         case ImGuiExt::Piano::KeyboardMsgType::NoteGetStatus:
-            return keyCode == detectedNoteIndex; // <- highlight only that key
+            return keyCode == detectedNoteIndex;
         case ImGuiExt::Piano::KeyboardMsgType::NoteOn:
         case ImGuiExt::Piano::KeyboardMsgType::NoteOff:
             return true;
@@ -518,10 +516,10 @@ int main() {
                             double endTime = (timeIndex + 1 < static_cast<int>(plotPeaks.size())) ? plotPeaks[timeIndex + 1] : duration;
 
                             std::vector<double> intervalFillX = { startTime, endTime };
-                            std::vector<double> intervalFillLow = { -1.0, -1.0 }; // Y-min (adjust as needed)
-                            std::vector<double> intervalFillHigh = { 1.0, 1.0 };  // Y-max (adjust as needed)
+                            std::vector<double> intervalFillLow = { -1.0, -1.0 };
+                            std::vector<double> intervalFillHigh = { 1.0, 1.0 };
 
-                            ImPlot::PushStyleColor(ImPlotCol_Fill, IM_COL32(255, 255, 0, 50)); // Light yellow transparent fill
+                            ImPlot::PushStyleColor(ImPlotCol_Fill, IM_COL32(255, 255, 0, 50)); 
                             ImPlot::PlotShaded("Current Interval", intervalFillX.data(), intervalFillLow.data(), intervalFillHigh.data(), 2);
                             ImPlot::PopStyleColor();
                         }
@@ -531,7 +529,7 @@ int main() {
                 }
                 if (needsAutoFit) {
                     ImPlot::SetNextAxesToFit();
-                    needsAutoFit = false;  // reset
+                    needsAutoFit = false;  
                 }
                 if (!analyzeFullAudio && ImPlot::BeginPlot(waveformTitle2.c_str())) {
                     ImPlot::SetupAxes("Time (Seconds)", "Amplitude");
